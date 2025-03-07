@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
   },
   profile: {
     type: String,
-    default: null, // Profile picture
+    default: null, 
   },
   role: {
     type: String,
@@ -41,10 +41,10 @@ const userSchema = new mongoose.Schema({
     {
       skillName: {
         type: String,
-        required: false, // Each certification requires a skill name
+        required: false, 
       },
       filePath: {
-        type: String, // Path to the uploaded certification file
+        type: String, 
         required: false,
       },
     },

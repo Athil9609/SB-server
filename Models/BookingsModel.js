@@ -5,12 +5,12 @@ const bookingSchema = new mongoose.Schema(
    
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users", // Reference to the same User model
+      ref: "users", 
       required: true,
     },
     serviceProviderId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "users", // Reference to the same User model for service provider
+      ref: "users", 
       required: true,
     },
     skillName: {
@@ -19,14 +19,13 @@ const bookingSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled","rejected"], // Example status
+      enum: ["pending", "confirmed", "completed", "cancelled","rejected"], 
       default: "pending",
     },
   },
-  { timestamps: true } // Mongoose will automatically add createdAt and updatedAt
+  { timestamps: true } 
 );
 
-// Create the model from the schema
 const Booking = mongoose.model("Bookings", bookingSchema);
 
 module.exports = Booking;

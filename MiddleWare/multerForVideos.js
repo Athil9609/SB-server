@@ -36,7 +36,7 @@ const fileFilter = (req, file, callback) => {
 const multerConfig = multer({
     storage,
     fileFilter,
-    limits: { fileSize: 150 * 1024 * 1024 } // Limit file size to 150MB (adjust as needed)
+    limits: { fileSize: 150 * 1024 * 1024 } 
 });
 
 module.exports = multerConfig;

@@ -12,7 +12,7 @@ const path=require('path')
 exports.userRegistration = async (req, res) => {
   try {
     const { userName, email, password } = req.body;
-    const files = req.files; // Uploaded files
+    const files = req.files; 
 
     console.log(req.body);
     console.log(req.files);
@@ -21,13 +21,11 @@ exports.userRegistration = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // Extract skill names and format file paths
     const certifications = files.map((file, index) => ({
-      skillName: req.body[`certifications_skillName_${index}`], // Get skill name
-      filePath: `/uploads/${path.basename(file.path)}`, // Ensure proper file path format
+      skillName: req.body[`certifications_skillName_${index}`], 
+      filePath: `/uploads/${path.basename(file.path)}`, 
     }));
 
-    // Create new user
     const newUser = new users({ userName, email, password, certifications });
     await newUser.save();
 
@@ -74,12 +72,10 @@ exports.login = async (req, res) => {
 
 exports.viewUsers = async (req, res) => {
   try {
-    // Fetch users with role "user"
     const usersList = await users
       .find({ role: "user" })
       .select("userName email profile phone certifications status password role");
 
-    // Fetch all skills related to these users
     const usersWithSkills = await Promise.all(
       usersList.map(async (user) => {
         const skill = await skills
@@ -90,7 +86,7 @@ exports.viewUsers = async (req, res) => {
 
         return {
           ...user._doc,
-          skill, // Attach the skills array to each user
+          skill, 
         };
       })
     );
@@ -291,7 +287,6 @@ exports.deleteMySkill = async (req, res) => {
   }
 };
 
-//skills under a category
 exports.viewSkills = async (req, res) => {
   try {
     const {id} = req.params;
@@ -351,11 +346,9 @@ exports.getMyRatings = async (req, res) => {
   }
 };
 
-// get user profile and details
 
 exports.getSpecificUserDetails = async (req, res) => {
   try {
-    // Fetch user details
     const userId = req.params.userId;
     const user = await users.findOne({ _id: userId });
 
@@ -363,22 +356,19 @@ exports.getSpecificUserDetails = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Fetch skills added by the user
     const Skills = await skills.find({ addedBy: user._id });
 
-    // Fetch ratings for the user
     const ratings = await RatingAndFeedback.find({ addedTo: user._id });
 
     console.log("Ratings:", ratings);
 
-    // Fetch reviewer names manually
     const ratingsWithReviewerNames = await Promise.all(
       ratings.map(async (rating) => {
         const reviewer = await users.findOne({ _id: rating.addedBy });
         return {
           rating: rating.rating,
           review: rating.review,
-          reviewerName: reviewer.userName, // Prevents null errors
+          reviewerName: reviewer.userName, 
           skill: rating.skill,
           reviewerId: reviewer._id,
           id: rating._id,
@@ -386,12 +376,11 @@ exports.getSpecificUserDetails = async (req, res) => {
       })
     );
 
-    // Create response object
     const userDetails = {
       user: {
         userName: user.userName,
         email: user.email,
-        profilePic: user.profile, // Profile picture
+        profilePic: user.profile,
         phone: user.phone,
         userId,
       },
@@ -402,10 +391,9 @@ exports.getSpecificUserDetails = async (req, res) => {
         demoVideoURL: skill.demoVideoURL,
         categoryName: skill.categoryName,
       })),
-      ratings: ratingsWithReviewerNames, // Use the manually fetched reviewer names
+      ratings: ratingsWithReviewerNames,
     };
 
-    // Send response
     return res.status(200).json(userDetails);
   } catch (error) {
     console.error("Error fetching user details:", error);
@@ -477,29 +465,27 @@ exports.addBooking = async (req, res) => {
     const userId = req.payload;
     console.log(req.body);
 
-    // Check if a booking already exists but allow new bookings if the status is "completed", "cancelled", or "rejected"
     const existingBooking = await bookings.findOne({
       userId,
       serviceProviderId,
       skillName,
-      status: { $nin: ["completed", "cancelled", "rejected"] }, // Allows new booking if not in these statuses
+      status: { $nin: ["completed", "cancelled", "rejected"] }, 
     });
 
     if (existingBooking) {
       return res.status(400).json({ message: "Booking already exists." });
     }
 
-    // Create a new booking
     const newBooking = new bookings({
       userId,
       serviceProviderId,
       skillName,
-      status: "pending", // Default status
+      status: "pending",
     });
 
     await newBooking.save();
 
-    return res.status(200).json(newBooking); // Only one response
+    return res.status(200).json(newBooking); 
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
@@ -509,11 +495,11 @@ exports.addBooking = async (req, res) => {
 
 exports.getMyBookings = async (req, res) => {
   try {
-    const userId = req.payload; // Ensure this contains the correct user ID
+    const userId = req.payload; 
 
     const myBookings = await bookings
-      .find({ userId }) // Find bookings where userId matches
-      .populate("serviceProviderId", "userName phone"); // Populate username & email
+      .find({ userId }) 
+      .populate("serviceProviderId", "userName phone"); 
 
     if (myBookings.length > 0) {
       res.status(200).json(myBookings);
@@ -594,7 +580,6 @@ exports.getSpecificBookingDetails = async (req, res) => {
       serviceReceiver,
     };
 
-    // Send the response back to the client
     res.json(response);
   } catch (error) {
     console.error("Error fetching booking details:", error);
@@ -716,7 +701,7 @@ exports.viewCategories = async (req, res) => {
 
     const categoriesWithUsers = await Promise.all(
       categories.map(async (category) => {
-        if (!category._id) return {}; // Return an empty object if category ID is missing
+        if (!category._id) return {}; 
 
         const skill = await skills.find({ categoryId: category._id });
 
@@ -726,7 +711,7 @@ exports.viewCategories = async (req, res) => {
           userIds.map(async (userId) => {
             const user = await users.findById(userId).select("userName email profile phone location");
 
-            if (!user) return {}; // Return an empty object if user is not found
+            if (!user) return {};
 
             const userSkills = skill
               .filter((s) => s.addedBy?.toString() === userId)
@@ -781,7 +766,6 @@ exports.addComplaintOrFeedback = async (req, res) => {
     const {  username, type, message, subject, rating } = req.body;
     const userId=req.payload
 
-    // Validate required fields
     if (!userId || !username || !type || !message) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -794,7 +778,6 @@ exports.addComplaintOrFeedback = async (req, res) => {
       return res.status(400).json({ error: "Feedback requires a valid rating (1-5)" });
     }
 
-    // Create new entry
     const newEntry = new complaintsAndFeedback({
       userId,
       username,
@@ -804,7 +787,6 @@ exports.addComplaintOrFeedback = async (req, res) => {
       rating: type === "feedback" ? rating : null
     });
 
-    // Save to database
     await newEntry.save();
 
     res.status(201).json({ message: `${type} submitted successfully`, data: newEntry });
@@ -876,7 +858,7 @@ exports.purchaseTime=async(req,res)=>{
     const {amount,currency}=req.body
 
     const instance = new Razorpay({
-      key_id: process.env.Razorpay_API_Key, // Ensure env variables are correct
+      key_id: process.env.Razorpay_API_Key, 
       key_secret: process.env.Razorpay_API_SecretKey,
     });
      const options={

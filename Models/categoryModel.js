@@ -6,11 +6,11 @@ const categoryModel=new moongoose.Schema(
         categoryName: {
           type: String,
           required: true,
-          unique: true, // Ensures no duplicate category names
+          unique: true, 
           trim: true,
         },
       },
-      { timestamps: true } // Automatically adds `createdAt` and `updatedAt`
+      { timestamps: true } 
    )
 
 const Skillcategories=moongoose.model('Skillcategories',categoryModel)
